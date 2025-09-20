@@ -12,6 +12,10 @@ def save_to_file(data):
     with open("data.json", "w") as f:
         json.dump(data, f, indent=4)
 
+def find_task_by_id(task_id):
+    task_id = int(input_split[2])   
+    task = next((task for task in data["tasks"] if task["id"] == task_id), None)
+    return(task)
 
 data = read_file()
 atexit.register(lambda: save_to_file(data))
@@ -22,7 +26,6 @@ while(True):
 
     if(input_split[0]!='task-cli'):
         print(f'{input_split[0]} is not a command!')
-        exit()
 
     command = input_split[1]
 
@@ -43,7 +46,7 @@ while(True):
     if(command == 'update'):
         task_id = int(input_split[2])   
         task_description = input_split[3]
-        task = next((task for task in data["tasks"] if task["id"] == task_id), None)
+        task = find_task_by_id(task_id)
         if task: 
             task["description"] = task_description
         else:
@@ -51,10 +54,25 @@ while(True):
 
     if(command == 'delete'):
         task_id = int(input_split[2])   
-        index = next((i for i, task in enumerate(data["tasks"]) 
-                      if task["id"] == task_id), None)
-        if index:
-            data["tasks"].pop(index)
+        task = find_task_by_id(task_id)
+        if task:
+            data["tasks"].remove(task)
+        else:
+            print(f'no task exist with id {task_id}')
+    
+    if(command == 'mark-in-progress'):
+        task_id = int(input_split[2])   
+        task = find_task_by_id(task_id)
+        if task:
+            task["status"] = 'in-progress'
+        else:
+            print(f'no task exist with id {task_id}')
+
+    if(command == 'mark-done'):
+        task_id = int(input_split[2])   
+        task = find_task_by_id(task_id)
+        if task:
+            task["status"] = 'done'
         else:
             print(f'no task exist with id {task_id}')
 
