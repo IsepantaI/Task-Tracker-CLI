@@ -1,14 +1,15 @@
 import json
 import shlex
 import atexit
+from datetime import datetime
 
 def read_file():
-    with open("tasks.json", "r") as f:
+    with open("data.json", "r") as f:
         data = json.load(f)
     return data
 
 def save_to_file(data):
-    with open("tasks.json", "w") as f:
+    with open("data.json", "w") as f:
         json.dump(data, f, indent=4)
 
 
@@ -32,11 +33,40 @@ while(True):
         new_task = {
             'id': data["last_id"],
             'description': description,
-            'status': 'todo' 
+            'status': 'todo',
+            'createdAt': datetime.now().isoformat(),
+            'updatedAT': datetime.now().isoformat()
         }
         data["tasks"].append(new_task)
-    with open("data.json", "w") as f:
-        json.dump(data, f, indent=4)
+        print(f'Task added successfully (ID: {new_task["id"]})')
+    
+    if(command == 'update'):
+        task_id = int(input_split[2])   
+        task_description = input_split[3]
+        task = next((task for task in data["tasks"] if task["id"] == task_id), None)
+        if task: 
+            task["description"] = task_description
+        else:
+            print(f'no task exist with id {task_id}')
 
-    print(data["tasks"])
+    if(command == 'delete'):
+        task_id = int(input_split[2])   
+        index = next((i for i, task in enumerate(data["tasks"]) 
+                      if task["id"] == task_id), None)
+        if index:
+            data["tasks"].pop(index)
+        else:
+            print(f'no task exist with id {task_id}')
+
+    if(command == 'list'):
+        print('-------------')
+        if(len(input_split) == 2):
+            for task in data["tasks"]:
+                print(task["description"],':', task["status"])
+        else:
+            for task in data["tasks"]:
+                if(task["status"] == input_split[2]):
+                    print(task["description"],':', task["status"])
+        print('-------------')
+            
 
